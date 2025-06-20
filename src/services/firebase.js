@@ -1,3 +1,5 @@
+//	Provides auth and db objects
+
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";

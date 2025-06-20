@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { forgotPassword } from "@/features/auth/firebaseAuth";
+import { forgotPassword } from "@/services/authService";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

@@ -1,6 +1,7 @@
 const mockProducts = [
   {
     id: "1",
+    storeId: "store1",
     name: "LED Headlight Bulb H4",
     category: "Car Accessories",
     price: 1399,
@@ -9,9 +10,26 @@ const mockProducts = [
       "Bright and energy-efficient LED headlight bulb for clear night driving.",
     brand: "Philips",
     stock: 20,
+    rating: 4,
+    reviewCount: 12,
+    reviews: [
+      {
+        username: "Alex",
+        rating: 5,
+        comment: "Really bright and lasts long!",
+        date: "2023-03-15",
+      },
+      {
+        username: "Sara",
+        rating: 3,
+        comment: "Good but a bit expensive.",
+        date: "2023-04-02",
+      },
+    ],
   },
   {
     id: "2",
+    storeId: "store2",
     name: "Motorcycle Helmet Full Face",
     category: "Motorcycle Accessories",
     price: 2199,
@@ -20,9 +38,20 @@ const mockProducts = [
       "High-impact resistant full face helmet with ventilation system.",
     brand: "LS2",
     stock: 15,
+    rating: 5,
+    reviewCount: 8,
+    reviews: [
+      {
+        username: "John",
+        rating: 5,
+        comment: "Comfortable and very safe.",
+        date: "2023-05-10",
+      },
+    ],
   },
   {
     id: "3",
+    storeId: "store1",
     name: "Car Seat Organizer",
     category: "Car Accessories",
     price: 599,
@@ -30,9 +59,20 @@ const mockProducts = [
     description: "Multi-pocket organizer to keep your car clean and tidy.",
     brand: "AutoStyle",
     stock: 40,
+    rating: 4,
+    reviewCount: 5,
+    reviews: [
+      {
+        username: "Kim",
+        rating: 4,
+        comment: "Very useful and fits perfectly.",
+        date: "2023-02-20",
+      },
+    ],
   },
   {
     id: "4",
+    storeId: "store2",
     name: "Motorcycle Gloves",
     category: "Motorcycle Accessories",
     price: 799,
@@ -40,9 +80,26 @@ const mockProducts = [
     description: "Protective gloves with anti-slip and touch screen support.",
     brand: "RiderPro",
     stock: 25,
+    rating: 4.5,
+    reviewCount: 9,
+    reviews: [
+      {
+        username: "Nina",
+        rating: 5,
+        comment: "Great grip and comfort.",
+        date: "2023-04-15",
+      },
+      {
+        username: "Paul",
+        rating: 4,
+        comment: "Good quality gloves.",
+        date: "2023-04-20",
+      },
+    ],
   },
   {
     id: "5",
+    storeId: "store1",
     name: "Dash Cam 1080p",
     category: "Car Accessories",
     price: 2499,
@@ -50,6 +107,16 @@ const mockProducts = [
     description: "Full HD dash camera with night vision and loop recording.",
     brand: "Xiaomi",
     stock: 12,
+    rating: 4,
+    reviewCount: 7,
+    reviews: [
+      {
+        username: "Lara",
+        rating: 4,
+        comment: "Good value for money.",
+        date: "2023-03-10",
+      },
+    ],
   },
 ];
 
