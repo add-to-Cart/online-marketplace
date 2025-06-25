@@ -1,9 +1,14 @@
-export default function SellerDashboard() {
+export default function SalesPanel() {
   return (
-    <div className="space-y-8">
-      <h1 className="text-xl font-bold">Welcome to your Seller Dashboard</h1>
+    <>
+      {/* Header */}
+      <header className="flex justify-between items-center pb-4 border-b border-gray-200">
+        <h1 className="text-xl font-semibold">Dashboard Overview</h1>
+        <div className="text-sm text-gray-500">Logged in as: {user?.email}</div>
+      </header>
 
-      <div className="grid grid-cols-2 gap-6">
+      {/* Summary */}
+      <section className="grid grid-cols-2 gap-6">
         <div className="p-4 border border-gray-200 rounded bg-white">
           <h2 className="text-sm text-gray-500 mb-1">Total Sales</h2>
           <p className="text-2xl font-semibold text-gray-800">₱12,340</p>
@@ -12,12 +17,13 @@ export default function SellerDashboard() {
           <h2 className="text-sm text-gray-500 mb-1">Orders</h2>
           <p className="text-2xl font-semibold text-gray-800">28</p>
         </div>
-      </div>
+      </section>
 
-      <div className="bg-white border border-gray-200 rounded p-4">
+      {/* Orders Preview */}
+      <section className="bg-white border border-gray-200 rounded p-4">
         <h2 className="text-base font-medium mb-2">Recent Orders</h2>
         <p className="text-sm text-gray-500">No recent orders to show.</p>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

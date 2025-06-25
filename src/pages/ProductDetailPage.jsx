@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import mockProducts from "@/features/products/data/mockProducts";
-import mockStores from "@/features/stores/data/mockStores";
+import { doc, getDoc, updateDoc, setDoc, increment } from "firebase/firestore";
+import { db } from "@/services/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { StarIcon } from "@heroicons/react/24/solid";
+import useRelatedProducts from "@/hooks/useRelatedProducts";
 
 function RatingStars({ rating }) {
   return (
-    <div className="flex items-center space-x-1 text-yellow-400">
+    <div className="flex items-center gap-1 text-yellow-400">
       {[1, 2, 3, 4, 5].map((num) => (
         <StarIcon
           key={num}
@@ -25,24 +26,72 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const product = mockProducts.find((p) => p.id === productId);
-  if (!product)
-    return (
-      <div className="text-center mt-20 text-xl font-semibold text-red-600">
-        Product not found
-      </div>
-    );
-
-  const store = mockStores.find((s) => s.id === product.storeId);
-
-  // Follow button state
+  const [product, setProduct] = useState(null);
+  const [store, setStore] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
 
-  const handleButtonClick = () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productRef = doc(db, "products", productId);
+        const productSnap = await getDoc(productRef);
+
+        if (productSnap.exists()) {
+          const productData = productSnap.data();
+          setProduct(productData);
+
+          await updateDoc(productRef, { viewCount: increment(1) });
+
+          if (user) {
+            const historyRef = doc(
+              db,
+              "users",
+              user.uid,
+              "viewHistory",
+              productId
+            );
+            await setDoc(
+              historyRef,
+              {
+                viewedAt: new Date(),
+                tags: productData.tags || [],
+                category: productData.category || "",
+                style: productData.style || "",
+                name: productData.name,
+                imageUrl: productData.imageUrl,
+              },
+              { merge: true }
+            );
+          }
+
+          if (productData.sellerId) {
+            const storeRef = doc(db, "users", productData.sellerId);
+            const storeSnap = await getDoc(storeRef);
+            if (storeSnap.exists()) {
+              setStore(storeSnap.data());
+            }
+          }
+        } else {
+          setProduct(null);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [productId, user]);
+
+  const { related, loading: loadingRelated } = useRelatedProducts(product);
+
+  const handleAddToCart = () => {
     if (!user) {
       navigate("/login", { state: { from: `/products/${productId}` } });
     } else {
-      alert(`Product "${product.name}" added to cart.`);
+      alert(`✅ "${product.name}" added to cart.`);
     }
   };
 
@@ -50,123 +99,168 @@ export default function ProductDetailPage() {
     if (!user) {
       navigate("/login", { state: { from: `/products/${productId}` } });
     } else {
-      alert(`Proceeding to buy "${product.name}".`);
+      alert(`🛒 Proceeding to buy "${product.name}".`);
     }
   };
 
   const toggleFollow = () => setFollowing((f) => !f);
 
+  if (loading)
+    return <div className="p-6 text-gray-600">Loading product details...</div>;
+  if (!product)
+    return (
+      <div className="text-center mt-20 text-xl font-semibold text-red-600">
+        Product not found.
+      </div>
+    );
+
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white mt-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        {/* Product Image */}
-        <div className="col-span-1">
+    <div className="max-w-5xl mx-auto px-4 py-8 mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div>
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full max-h-96 object-contain rounded-lg border border-gray-200"
+            className="w-full h-96 object-contain rounded-md border border-gray-100"
           />
         </div>
 
-        {/* Product Details */}
-        <div className="col-span-2 space-y-6">
-          <h1 className="font-medium">{product.name}</h1>
+        <div className="space-y-4">
+          <h1 className="text-xl font-semibold text-gray-800">
+            {product.name}
+          </h1>
 
-          <div className="flex items-center space-x-4">
-            <RatingStars className="h-2 w-2" rating={product.rating} />
-            <span className="text-gray-600">
-              ({product.reviewCount} reviews)
-            </span>
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            <RatingStars rating={4} />
+            <span>(123 reviews)</span>
           </div>
 
-          <p className="text-lg text-gray-700">{product.description}</p>
+          <p className="text-gray-600 text-sm">{product.description}</p>
 
-          <p className="text-2xl font-bold text-indigo-600">
+          <p className="text-2xl font-bold text-blue-600">
             ₱{product.price.toLocaleString()}
           </p>
 
-          {/* Variations example (hardcoded here, you can extend) */}
-          <div>
-            <label className="block mb-2 font-medium">Brand</label>
-            <select className="border rounded-md p-2 w-48">
-              <option>{product.brand}</option>
-              {/* Add more brands or variations here */}
-            </select>
+          <div className="text-sm text-gray-500 space-y-1">
+            <p>
+              Category:{" "}
+              <span className="font-medium text-gray-700">
+                {product.category}
+              </span>
+            </p>
+            <p>
+              Style:{" "}
+              <span className="font-medium text-gray-700">
+                {Array.isArray(product.style)
+                  ? product.style.join(", ")
+                  : product.style}
+              </span>
+            </p>
+            <p>
+              Vehicle:{" "}
+              <span className="font-medium text-gray-700">
+                {product.vehicleType}
+              </span>
+            </p>
+            <p>
+              Stock:{" "}
+              <span className="font-medium text-gray-700">{product.stock}</span>
+            </p>
+            <p>
+              Status:{" "}
+              <span
+                className={
+                  product.isAvailable
+                    ? "text-green-600 font-medium"
+                    : "text-red-500"
+                }
+              >
+                {product.isAvailable ? "Available" : "Out of Stock"}
+              </span>
+            </p>
           </div>
 
-          <div className="flex space-x-4">
+          <div className="flex gap-3 pt-4">
             <button
-              onClick={handleButtonClick}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
+              onClick={handleAddToCart}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
             >
               Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+              className="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
             >
               Buy Now
             </button>
           </div>
-
-          {/* Seller / Store Info */}
-          {store && (
-            <div className="border-t pt-6 space-y-4">
-              <h2 className="text-2xl font-semibold">Seller Information</h2>
-              <div className="flex items-center space-x-4">
-                <img
-                  src={store.logoUrl}
-                  alt={store.name}
-                  className="w-20 h-20 object-contain rounded"
-                />
-                <div>
-                  <h3 className="text-lg font-medium">{store.name}</h3>
-                  <RatingStars rating={store.rating} />
-                  <p className="text-gray-600">{store.reviewCount} reviews</p>
-                  <p className="text-gray-600">{store.productCount} products</p>
-                  <p className="text-gray-600">Location: {store.location}</p>
-                  <p className="text-gray-600">
-                    Joined: {new Date(store.joinedDate).toLocaleDateString()}
-                  </p>
-                  <p className="text-gray-600">
-                    Followers: {store.followers.toLocaleString()}
-                  </p>
-                </div>
-                <button
-                  onClick={toggleFollow}
-                  className={`ml-auto px-4 py-2 rounded-md border ${
-                    following
-                      ? "bg-indigo-600 text-white"
-                      : "border-indigo-600 text-indigo-600"
-                  } hover:bg-indigo-700 hover:text-white transition`}
-                >
-                  {following ? "Following" : "Follow"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Reviews */}
-          <div className="border-t pt-6 space-y-4">
-            <h2 className="text-2xl font-semibold">Customer Reviews</h2>
-            {product.reviews.length === 0 && (
-              <p className="text-gray-600">No reviews yet.</p>
-            )}
-            {product.reviews.map((review, idx) => (
-              <div key={idx} className="border p-4 rounded-md space-y-1">
-                <div className="flex items-center space-x-2">
-                  <strong>{review.username}</strong>
-                  <RatingStars rating={review.rating} />
-                  <span className="text-gray-500 text-sm">
-                    {new Date(review.date).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-gray-700">{review.comment}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
+
+      {/* Seller Info */}
+      {store && (
+        <div className="mt-12 p-6 bg-white border border-gray-100 rounded-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img
+                src={store.avatarUrl || "/default-avatar.png"}
+                alt={store.username}
+                className="w-14 h-14 rounded-full border border-gray-200 object-cover"
+              />
+              <div>
+                <h2 className="text-base font-semibold">
+                  {store.storeName || store.username}
+                </h2>
+                <p className="text-sm text-gray-500">{store.email}</p>
+              </div>
+            </div>
+            <button
+              onClick={toggleFollow}
+              className={`text-sm px-3 py-1.5 rounded border ${
+                following
+                  ? "bg-blue-600 text-white"
+                  : "text-blue-600 border-blue-600"
+              } hover:bg-blue-700 hover:text-white`}
+            >
+              {following ? "Following" : "Follow"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Related Products */}
+      {related.length > 0 && (
+        <div className="mt-16">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            You may also like
+          </h3>
+          {loadingRelated ? (
+            <p className="text-sm text-gray-500">Loading recommendations...</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {related.map((item) => (
+                <div
+                  key={item.id}
+                  className="border rounded p-3 bg-white hover:shadow transition cursor-pointer"
+                  onClick={() => navigate(`/products/${item.id}`)}
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="w-full h-32 object-contain mb-2"
+                  />
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {item.name}
+                  </p>
+                  <p className="text-sm text-blue-600 font-semibold">
+                    ₱{item.price?.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

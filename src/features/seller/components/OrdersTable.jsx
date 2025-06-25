@@ -9,7 +9,7 @@ export default function OrdersTable() {
   useEffect(() => {
     const load = async () => {
       const ref = collection(db, "orders");
-      const q = query(ref, where("sellerId", "==", auth.currentUser.uid));
+      const q = query(ref, where("uid", "==", auth.currentUser.uid));
       const snap = await getDocs(q);
       setOrders(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };

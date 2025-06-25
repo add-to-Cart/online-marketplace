@@ -31,7 +31,7 @@ export default function DesktopNav({ navigation }) {
               </PopoverButton>
             </div>
 
-            <PopoverPanel className="absolute inset-x-0 top-full bg-white shadow-sm">
+            <PopoverPanel className="absolute inset-x-0 top-full bg-white shadow-sm text-gray-800">
               <div className="mx-auto max-w-7xl px-8 py-8">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-10">
                   <div className="col-start-2 grid grid-cols-2 gap-x-8">
