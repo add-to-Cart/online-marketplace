@@ -4,6 +4,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   deleteDoc,
   doc,
 } from "firebase/firestore";

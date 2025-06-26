@@ -10,9 +10,9 @@ export const deleteImage = async (publicId) => {
 
   const data = await res.json();
 
-  if (!res.ok) {
+  if (!res.ok || data.result?.result !== "ok") {
     throw new Error(data.error || "Failed to delete image");
   }
 
-  return data.result;
+  return true;
 };
