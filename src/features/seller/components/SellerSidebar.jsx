@@ -1,4 +1,3 @@
-// components/SellerSidebar.jsx
 export default function SellerSidebar({ seller }) {
   return (
     <aside className="w-64 bg-white shadow-md p-4">

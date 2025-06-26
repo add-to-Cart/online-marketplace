@@ -76,7 +76,7 @@ export default function ProductDetailPage() {
           setProduct(null);
         }
       } catch (error) {
-        console.error("Error fetching product:", error);
+        alert("Error fetching product:", error);
       } finally {
         setLoading(false);
       }
@@ -197,7 +197,6 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Seller Info */}
       {store && (
         <div className="mt-12 p-6 bg-white border border-gray-100 rounded-md">
           <div className="flex items-center justify-between">
@@ -228,7 +227,6 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* Related Products */}
       {related.length > 0 && (
         <div className="mt-16">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">

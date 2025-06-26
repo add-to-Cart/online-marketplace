@@ -1,4 +1,3 @@
-//Handles authentication (login, signup, Google)
 import { googleProvider } from "@/services/firebase";
 import {
   createUserWithEmailAndPassword,
@@ -49,33 +48,26 @@ export const registerWithEmail = async (email, password, username) => {
   return user;
 };
 
-// 🧠 Smart login with email or username
 export const smartLogin = async (identifier, password) => {
   const email = await resolveEmailFromUsername(identifier);
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-// 🔁 Basic email login (if you don't need smart login)
 export const loginWithEmail = (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-// 🔐 Google sign-in with Firestore record
 export const signInWithGoogle = async () => {
   const result = await signInWithPopup(auth, googleProvider);
   const user = result.user;
-  await saveUserToFirestore(user); // 🔁 ensure user is in Firestore
+  await saveUserToFirestore(user);
   return user;
 };
 
-// 5. Account Recovery and Verification
-
-// 🔄 Forgot password
 export const forgotPassword = async (email) => {
   await sendPasswordResetEmail(auth, email);
 };
 
-// 🔁 Resend email verification
 export const resendVerificationEmail = async () => {
   const user = auth.currentUser;
   if (!user) throw new Error("User not signed in.");

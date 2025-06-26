@@ -1,4 +1,3 @@
-// components/OrdersTable.jsx
 import { useState, useEffect } from "react";
 import { db } from "@/services/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";

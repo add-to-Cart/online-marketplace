@@ -1,4 +1,3 @@
-// NotASellerPage.jsx
 export default function RestrictedSellerPage() {
   return (
     <div className="p-8 max-w-xl mx-auto text-center text-red-600">

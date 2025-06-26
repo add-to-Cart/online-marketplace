@@ -25,7 +25,7 @@ export default function ProductList() {
         }));
         setProducts(items);
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        alert.error("Failed to fetch products:", error);
       } finally {
         setLoading(false);
       }
@@ -48,11 +48,11 @@ export default function ProductList() {
         <h2 className="text-xl font-semibold text-gray-800">
           Your Product Listings
         </h2>
-        {/* Optional: Add button for modal form on mobile */}
+
         <Link
           to="#"
           className="block md:hidden text-sm text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-          onClick={() => alert("Open modal form")} // Replace this with modal logic
+          onClick={() => alert("Open modal form")}
         >
           + Add Product
         </Link>
@@ -64,19 +64,16 @@ export default function ProductList() {
             key={product.id}
             className="bg-white p-4 rounded shadow-sm border border-gray-200"
           >
-            {/* Row 1: Product Name */}
             <h3 className="text-base font-semibold text-gray-800 mb-2 line-clamp-2">
               {product.name}
             </h3>
 
-            {/* Row 2: Product Image */}
             <img
               src={product.imageUrl}
               alt={product.name}
               className="w-full h-40 object-cover rounded border border-gray-300 shadow-sm mb-3"
             />
 
-            {/* Row 3: Product Info */}
             <div className="space-y-1 text-sm">
               <p className="font-semibold text-blue-600">
                 ₱{product.price?.toLocaleString()}
@@ -113,7 +110,6 @@ export default function ProductList() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="mt-4 flex justify-end gap-2">
               <Link
                 to={`/seller/products/edit/${product.id}`}

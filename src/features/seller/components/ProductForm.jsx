@@ -5,7 +5,7 @@ import { uploadProductImage } from "@/services/cloudinary";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
-export default function ProductForm({ onAdd }) {
+export default function ProductForm() {
   const { user, loading } = useUser();
   const navigate = useNavigate();
 
@@ -22,14 +22,12 @@ export default function ProductForm({ onAdd }) {
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef(null);
 
-  // If still loading user context
   if (loading) {
     return <p className="p-4 text-gray-600 text-sm">Loading user...</p>;
   }
 
-  // If not logged in or not an approved seller
   if (!user || !user.seller || !user.seller.isApproved) {
-    navigate("/not-a-seller"); // 🔁 Redirect to fallback page
+    navigate("/not-a-seller");
     return null;
   }
 
@@ -65,10 +63,8 @@ export default function ProductForm({ onAdd }) {
     }
 
     try {
-      // 1. Upload image to Cloudinary
       const { url, publicId } = await uploadProductImage(image);
 
-      //add product to firestore
       await addDoc(collection(db, "products"), {
         name: name.trim(),
         price: parseFloat(price),
@@ -88,7 +84,6 @@ export default function ProductForm({ onAdd }) {
 
       alert("✅ Product added successfully!");
 
-      // 3. Reset form
       setName("");
       setPrice("");
       setCategory("");
@@ -101,8 +96,7 @@ export default function ProductForm({ onAdd }) {
       setPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = null;
     } catch (error) {
-      console.error("Error uploading product:", error);
-      alert("❌ Failed to add product. Try again.");
+      alert("❌ Failed to add product. Try again.", error);
     }
   };
 
@@ -113,7 +107,6 @@ export default function ProductForm({ onAdd }) {
     >
       <h2 className="text-lg font-semibold text-gray-800">Add New Product</h2>
 
-      {/* Image Upload */}
       <div>
         <label className="block text-sm text-gray-600 mb-1">
           Product Image

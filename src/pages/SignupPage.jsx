@@ -1,9 +1,8 @@
 import { useState, useEffect, useReducer, act } from "react";
 import { registerWithEmail, signInWithGoogle } from "@/services";
 import { isUsernameAvailable, validateUsername } from "@/helpers";
-import { FcDisplay, FcGoogle } from "react-icons/fc";
+import { FcGoogle } from "react-icons/fc";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 
 const initialState = {
   username: "",
@@ -126,7 +125,6 @@ export default function SignupPage() {
                     Username is available ✅
                   </span>
                 ) : (
-                  // Username taken message shown only if no validation error
                   <span className="text-red-600">Username is taken ❌</span>
                 )}
               </p>

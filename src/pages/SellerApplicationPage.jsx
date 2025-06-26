@@ -30,19 +30,18 @@ export default function ApplyAsSellerPage() {
 
       await setDoc(doc(db, "sellers", user.uid), sellerData);
 
-      // ⬇️ Refresh seller data in user context
       setUser((prev) => ({
         ...prev,
         seller: {
           ...sellerData,
-          requestedAt: new Date(), // fallback until Firestore returns correct timestamp
+          requestedAt: new Date(),
         },
       }));
 
       toast.success("Seller application submitted!");
-      navigate("/"); // or go to a confirmation/status page
+      navigate("/");
     } catch (err) {
-      console.error(err);
+      alert(err);
       toast.error("Failed to submit application.");
     } finally {
       setLoading(false);

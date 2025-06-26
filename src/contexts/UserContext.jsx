@@ -16,18 +16,16 @@ export const UserProvider = ({ children }) => {
         const userSnap = await getDoc(userRef);
         const userData = userSnap.exists() ? userSnap.data() : {};
 
-        // 🔁 Try to get seller data too
         const sellerRef = doc(db, "sellers", firebaseUser.uid);
         const sellerSnap = await getDoc(sellerRef);
         const sellerData = sellerSnap.exists() ? sellerSnap.data() : null;
 
-        // Merge all
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           emailVerified: firebaseUser.emailVerified,
           ...userData,
-          seller: sellerData, // null if not a seller
+          seller: sellerData,
         });
       } else {
         setUser(null);

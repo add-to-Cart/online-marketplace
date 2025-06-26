@@ -43,7 +43,7 @@ export default function ProfilePage() {
       setAvatarUrl(url);
       toast.success("Avatar uploaded!");
     } catch (error) {
-      console.error(error);
+      alert(error);
       toast.error("Failed to upload avatar.");
     }
   };
@@ -90,7 +90,7 @@ export default function ProfilePage() {
 
       toast.success("Profile updated!");
     } catch (err) {
-      console.error(err);
+      alert(err);
       toast.error("Update failed.");
     } finally {
       setLoading(false);

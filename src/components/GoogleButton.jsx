@@ -6,7 +6,6 @@ export default function GoogleButton() {
     try {
       const user = await signInWithGoogle();
       alert(`Welcome ${user.displayName}!`);
-      // Navigate to dashboard or homepage if needed
     } catch (error) {
       alert(error.message);
     }

@@ -9,14 +9,12 @@ export default function SellerLayout() {
   const { user, loading: userLoading } = useUser();
   const navigate = useNavigate();
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !authUser) {
       navigate("/login");
     }
   }, [authLoading, authUser, navigate]);
 
-  // Redirect if not a seller or not approved
   useEffect(() => {
     if (
       !authLoading &&

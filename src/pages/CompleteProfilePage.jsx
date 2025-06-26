@@ -1,4 +1,3 @@
-// src/pages/CompleteProfile.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "@/services/firebase";
@@ -26,7 +25,6 @@ export default function CompleteProfilePage() {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // Listen to auth state to get the current user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -91,7 +89,7 @@ export default function CompleteProfilePage() {
       navigate("/");
     } catch (error) {
       toast.error("Failed to save profile.");
-      console.error(error);
+      alert(error);
     } finally {
       setSubmitting(false);
     }

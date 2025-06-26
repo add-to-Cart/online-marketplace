@@ -11,7 +11,6 @@ import {
 
 import { db } from "@/services/firebase";
 
-// Handles user data in Firestore
 export const saveUserToFirestore = async (user) => {
   const userRef = doc(db, "users", user.uid);
   const docSnap = await getDoc(userRef);
@@ -31,7 +30,6 @@ export const saveUserToFirestore = async (user) => {
   }
 };
 
-// 🔍 Resolve email from username (for smart login)
 export const resolveEmailFromUsername = async (identifier) => {
   if (identifier.includes("@")) return identifier;
 

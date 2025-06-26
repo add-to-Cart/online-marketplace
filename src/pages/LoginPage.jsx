@@ -16,7 +16,6 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
-  // Auto-redirect if already logged in AND verified
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
@@ -47,12 +46,10 @@ export default function LoginPage() {
       const userCredential = await smartLogin(identifier, password);
       const user = userCredential.user;
 
-      // Check if user document exists in Firestore
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        // Create user profile with username = null (incomplete)
         await setDoc(userRef, {
           uid: user.uid,
           email: user.email,
@@ -63,7 +60,7 @@ export default function LoginPage() {
       }
 
       if (!user.emailVerified) {
-        await auth.signOut(); // force logout
+        await auth.signOut();
         toast.warn(
           <>
             Please verify your email first.{" "}
@@ -78,14 +75,12 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ Re-fetch updated user data after possible write
       const updatedSnap = await getDoc(userRef);
       const userData = updatedSnap.exists() ? updatedSnap.data() : null;
       const profileComplete = userData && userData.username;
 
       toast.success("Login successful!");
 
-      // ✅ Navigate based on profile completion
       if (!profileComplete) {
         navigate("/complete-profile");
       } else {
@@ -122,18 +117,16 @@ export default function LoginPage() {
       const userDocRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userDocRef);
 
-      // ✅ Create user doc if it doesn't exist FIRST
       if (!userSnap.exists()) {
         await setDoc(userDocRef, {
           uid: user.uid,
           email: user.email,
           createdAt: serverTimestamp(),
           emailVerified: user.emailVerified,
-          username: null, // incomplete
+          username: null,
         });
       }
 
-      // ✅ Re-fetch user data after possible creation
       const updatedSnap = await getDoc(userDocRef);
       const userData = updatedSnap.exists() ? updatedSnap.data() : null;
       const profileComplete = userData && userData.username;

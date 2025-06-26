@@ -52,7 +52,6 @@ export default function AdminSellerDashboard() {
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setHasMore(snapshot.docs.length === PAGE_SIZE);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to load seller requests.");
     } finally {
       setLoading(false);
@@ -73,7 +72,7 @@ export default function AdminSellerDashboard() {
       }));
       setApprovedSellers(sellers);
     } catch (error) {
-      console.error(error);
+      alert(error);
       toast.error("Failed to load approved sellers.");
     }
   };
@@ -90,7 +89,7 @@ export default function AdminSellerDashboard() {
       setPendingSellers((prev) => prev.filter((s) => s.id !== uid));
       fetchApprovedSellers();
     } catch (error) {
-      console.error(error);
+      alert(error);
       toast.error("Failed to approve seller.");
     }
   };
@@ -102,7 +101,7 @@ export default function AdminSellerDashboard() {
       simulateEmail(uid, storeName, "rejected");
       setPendingSellers((prev) => prev.filter((s) => s.id !== uid));
     } catch (error) {
-      console.error(error);
+      alert(error);
       toast.error("Failed to reject seller.");
     }
   };
@@ -112,7 +111,7 @@ export default function AdminSellerDashboard() {
       type === "approved"
         ? `Hi ${storeName}, your seller application has been approved.`
         : `Hi ${storeName}, your seller application has been rejected.`;
-    console.log(`📧 Simulated Email to UID ${uid}: ${message}`);
+    alert(`📧 Simulated Email to UID ${uid}: ${message}`);
   };
 
   const filteredApproved = approvedSellers.filter((seller) =>
