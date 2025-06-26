@@ -10,11 +10,13 @@ import {
 import { db } from "@/services/firebase";
 import { useUser } from "@/contexts/UserContext";
 import { Link } from "react-router-dom";
+import { deleteImage } from "@/services/deleteImage";
 
 export default function ProductList() {
   const { user } = useUser();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -42,17 +44,33 @@ export default function ProductList() {
   }, [user]);
 
   const handleDelete = async (productId) => {
+    if (deletingId) return;
+
     const confirm = window.confirm(
       "Are you sure you want to delete this product?"
     );
     if (!confirm) return;
 
+    setDeletingId(productId);
+
     try {
-      await deleteDoc(doc(db, "products", productId));
+      const productDoc = doc(db, "products", productId);
+      const snap = await getDoc(productDoc);
+      if (!snap.exists()) throw new Error("Product not found.");
+
+      const { cloudinaryId } = snap.data();
+
+      if (cloudinaryId) {
+        await deleteImage(cloudinaryId);
+      }
+
+      await deleteDoc(productDoc);
       setProducts((prev) => prev.filter((p) => p.id !== productId));
-      alert("✅ Product deleted from Firestore.");
+      alert("✅ Product and image deleted.");
     } catch (err) {
-      alert("❌ Failed to delete product.", err);
+      alert("❌ Failed to delete product or image.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -141,9 +159,14 @@ export default function ProductList() {
               </Link>
               <button
                 onClick={() => handleDelete(product.id)}
-                className="px-3 py-1 text-sm text-red-600 hover:underline"
+                disabled={deletingId === product.id}
+                className={`px-3 py-1 text-sm text-red-600 hover:underline ${
+                  deletingId === product.id
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
               >
-                Delete
+                {deletingId === product.id ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

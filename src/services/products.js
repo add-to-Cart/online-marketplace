@@ -3,7 +3,7 @@ import { collection, getDocs, addDoc } from "firebase/firestore";
 
 const productsCollection = collection(db, "products");
 
-export async function fetchProductss() {
+export async function fetchProducts() {
   const snapshot = await getDocs(productsCollection);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }

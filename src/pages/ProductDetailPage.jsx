@@ -4,7 +4,12 @@ import { doc, getDoc, updateDoc, setDoc, increment } from "firebase/firestore";
 import { db } from "@/services/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { StarIcon } from "@heroicons/react/24/solid";
-import useRelatedProducts from "@/hooks/useRelatedProducts";
+import {
+  followSeller,
+  unfollowSeller,
+  isFollowing,
+} from "@/services/followService";
+import { getRecommendedProducts } from "@/services/recommendationService";
 
 function RatingStars({ rating }) {
   return (
@@ -28,8 +33,10 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState(null);
   const [store, setStore] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [related, setRelated] = useState([]);
   const [following, setFollowing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingRelated, setLoadingRelated] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,55 +44,69 @@ export default function ProductDetailPage() {
         const productRef = doc(db, "products", productId);
         const productSnap = await getDoc(productRef);
 
-        if (productSnap.exists()) {
-          const productData = productSnap.data();
-          setProduct(productData);
-
-          await updateDoc(productRef, { viewCount: increment(1) });
-
-          if (user) {
-            const historyRef = doc(
-              db,
-              "users",
-              user.uid,
-              "viewHistory",
-              productId
-            );
-            await setDoc(
-              historyRef,
-              {
-                viewedAt: new Date(),
-                tags: productData.tags || [],
-                category: productData.category || "",
-                style: productData.style || "",
-                name: productData.name,
-                imageUrl: productData.imageUrl,
-              },
-              { merge: true }
-            );
-          }
-
-          if (productData.sellerId) {
-            const storeRef = doc(db, "users", productData.sellerId);
-            const storeSnap = await getDoc(storeRef);
-            if (storeSnap.exists()) {
-              setStore(storeSnap.data());
-            }
-          }
-        } else {
+        if (!productSnap.exists()) {
           setProduct(null);
+          return;
         }
+
+        const productData = productSnap.data();
+        setProduct(productData);
+
+        // Increment view count
+        await updateDoc(productRef, { viewCount: increment(1) });
+
+        // Save view history
+        if (user) {
+          const historyRef = doc(
+            db,
+            "users",
+            user.uid,
+            "viewHistory",
+            productId
+          );
+          await setDoc(
+            historyRef,
+            {
+              viewedAt: new Date(),
+              tags: productData.tags || [],
+              category: productData.category || "",
+              style: productData.style || "",
+              name: productData.name,
+              imageUrl: productData.imageUrl,
+            },
+            { merge: true }
+          );
+        }
+
+        // Fetch seller info
+        if (productData.sellerId) {
+          const storeRef = doc(db, "users", productData.sellerId);
+          const storeSnap = await getDoc(storeRef);
+          if (storeSnap.exists()) {
+            setStore(storeSnap.data());
+          }
+
+          // Check follow status (after sellerId exists)
+          if (user && user.uid !== productData.sellerId) {
+            const result = await isFollowing(user.uid, productData.sellerId);
+            setFollowing(result);
+          }
+        }
+
+        // Fetch related products
+        const recommended = await getRecommendedProducts(productData);
+        setRelated(recommended);
       } catch (error) {
-        alert("Error fetching product:", error);
+        alert("Error loading product details");
+        console.error(error);
       } finally {
         setLoading(false);
+        setLoadingRelated(false);
       }
     };
 
     fetchData();
   }, [productId, user]);
-
-  const { related, loading: loadingRelated } = useRelatedProducts(product);
 
   const handleAddToCart = () => {
     if (!user) {
@@ -103,7 +124,22 @@ export default function ProductDetailPage() {
     }
   };
 
-  const toggleFollow = () => setFollowing((f) => !f);
+  const toggleFollow = async () => {
+    if (!user || !product?.sellerId || user.uid === product.sellerId) return;
+
+    try {
+      if (following) {
+        await unfollowSeller(user.uid, product.sellerId);
+        setFollowing(false);
+      } else {
+        await followSeller(user.uid, product.sellerId);
+        setFollowing(true);
+      }
+    } catch (err) {
+      alert("❌ Failed to update follow status.");
+      console.error(err);
+    }
+  };
 
   if (loading)
     return <div className="p-6 text-gray-600">Loading product details...</div>;
@@ -116,6 +152,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 mt-12">
+      {/* Product Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         <div>
           <img
@@ -197,6 +234,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
+      {/* Seller Info */}
       {store && (
         <div className="mt-12 p-6 bg-white border border-gray-100 rounded-md">
           <div className="flex items-center justify-between">
@@ -212,20 +250,23 @@ export default function ProductDetailPage() {
                 </h2>
               </div>
             </div>
-            <button
-              onClick={toggleFollow}
-              className={`text-sm px-3 py-1.5 rounded border ${
-                following
-                  ? "bg-blue-600 text-white"
-                  : "text-blue-600 border-blue-600"
-              } hover:bg-blue-700 hover:text-white`}
-            >
-              {following ? "Following" : "Follow"}
-            </button>
+            {user?.uid !== product.sellerId && (
+              <button
+                onClick={toggleFollow}
+                className={`text-sm px-3 py-1.5 rounded border ${
+                  following
+                    ? "bg-blue-600 text-white"
+                    : "text-blue-600 border-blue-600"
+                } hover:bg-blue-700 hover:text-white`}
+              >
+                {following ? "Following" : "Follow"}
+              </button>
+            )}
           </div>
         </div>
       )}
 
+      {/* Related Products */}
       {related.length > 0 && (
         <div className="mt-16">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
