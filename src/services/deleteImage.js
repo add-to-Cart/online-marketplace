@@ -1,9 +1,18 @@
-import axios from "axios";
+export const deleteImage = async (publicId) => {
+  const res = await fetch(
+    "https://express-api-d7v4.onrender.com/api/delete-image",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ publicId }),
+    }
+  );
 
-// Replace this with your actual Render URL (after it deploys)
-const API_BASE = "https://your-api-name.onrender.com";
+  const data = await res.json();
 
-export async function deleteImage(publicId) {
-  const res = await axios.post(`${API_BASE}/api/delete-image`, { publicId });
-  return res.data;
-}
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to delete image");
+  }
+
+  return data.result;
+};
