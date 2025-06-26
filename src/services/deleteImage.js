@@ -8,11 +8,12 @@ export const deleteImage = async (publicId) => {
     }
   );
 
-  const data = await res.json();
+  const text = await res.text(); // read raw text for now
+  console.log("Raw delete response:", text); // ✅ view in browser console
 
-  if (!res.ok || data.result?.result !== "ok") {
-    throw new Error(data.error || "Failed to delete image");
+  if (!res.ok) {
+    throw new Error("Failed to delete image");
   }
 
-  return true;
+  return JSON.parse(text).result;
 };
