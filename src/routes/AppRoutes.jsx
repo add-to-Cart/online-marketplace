@@ -18,6 +18,7 @@ import ProductsPage from "@/features/seller/pages/ProductsPage";
 import SalesPage from "@/features/seller/pages/SalesPage";
 import OrdersPage from "@/features/seller/pages/OrdersPage";
 import RestrictedSellerPage from "@/pages/RestrictedSellerPage";
+import ProductForm from "@/features/seller/components/ProductForm";
 
 export default function AppRoutes() {
   return (
@@ -40,6 +41,7 @@ export default function AppRoutes() {
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="sales" element={<SalesPage />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route path="/seller/products/edit/:id" element={<ProductForm />} />
       </Route>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

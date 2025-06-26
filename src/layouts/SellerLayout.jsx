@@ -35,7 +35,7 @@ export default function SellerLayout() {
 
   return (
     <div className="flex min-h-screen bg-gray-100 text-gray-800 font-sans">
-      <aside className="w-64 bg-white border-r border-gray-200">
+      <aside className="w-full max-w-xs bg-white border-r border-gray-200 hidden md:block">
         <Sidebar />
       </aside>
       <main className="flex-1 p-8">

@@ -1,11 +1,18 @@
-import { useState, useRef } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useState, useRef, useEffect } from "react";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/services/firebase";
 import { uploadProductImage } from "@/services/cloudinary";
 import { useUser } from "@/contexts/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function ProductForm() {
+export default function ProductForm({ existingProduct = null }) {
   const { user, loading } = useUser();
   const navigate = useNavigate();
 
@@ -20,7 +27,34 @@ export default function ProductForm() {
   const [isAvailable, setIsAvailable] = useState(true);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef(null);
+  const { id } = useParams();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+
+      const docRef = doc(db, "products", id);
+      const snap = await getDoc(docRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setName(data.name || "");
+        setPrice(data.price || "");
+        setCategory(data.category || "");
+        setStyles(data.styles || []);
+        setVehicleType(data.vehicleType || "");
+        setDescription(data.description || "");
+        setStock(data.stock || "");
+        setTags(data.tags?.join(", ") || "");
+        setIsAvailable(data.isAvailable ?? true);
+        setPreview(data.imageUrl || "");
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   if (loading) {
     return <p className="p-4 text-gray-600 text-sm">Loading user...</p>;
@@ -48,7 +82,6 @@ export default function ProductForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (
       !name ||
       !price ||
@@ -56,16 +89,32 @@ export default function ProductForm() {
       styles.length === 0 ||
       !stock ||
       !description ||
-      !image ||
+      (!id && !image) ||
       !vehicleType
     ) {
-      return alert("Please fill out all required fields.");
+      alert("Please fill out all required fields.");
+      return;
     }
 
-    try {
-      const { url, publicId } = await uploadProductImage(image);
+    if (submitting) return;
+    setSubmitting(true);
 
-      await addDoc(collection(db, "products"), {
+    try {
+      let imageUrl = preview;
+      let publicId = null;
+
+      if (image) {
+        const upload = await uploadProductImage(image, {
+          publicId: `products/${user.uid}-${name
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`,
+        });
+        imageUrl = upload.url;
+        publicId = upload.publicId;
+      }
+
+      const productData = {
         name: name.trim(),
         price: parseFloat(price),
         category,
@@ -75,28 +124,31 @@ export default function ProductForm() {
         stock: parseInt(stock),
         tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
         isAvailable,
-        imageUrl: url,
-        cloudinaryId: publicId,
+        imageUrl,
         sellerId: user.uid,
         storeName: user.seller?.storeName || "",
-        createdAt: serverTimestamp(),
-      });
+      };
 
-      alert("✅ Product added successfully!");
+      if (publicId) {
+        productData.cloudinaryId = publicId;
+      }
 
-      setName("");
-      setPrice("");
-      setCategory("");
-      setStyles("");
-      setDescription("");
-      setStock("");
-      setTags("");
-      setIsAvailable(true);
-      setImage(null);
-      setPreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = null;
-    } catch (error) {
-      alert("❌ Failed to add product. Try again.", error);
+      if (id) {
+        await updateDoc(doc(db, "products", id), productData);
+        alert("✅ Product updated successfully!");
+      } else {
+        await addDoc(collection(db, "products"), {
+          ...productData,
+          createdAt: serverTimestamp(),
+        });
+        alert("✅ Product added successfully!");
+      }
+
+      navigate("/seller/products");
+    } catch (err) {
+      alert("❌ Failed to submit product", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -281,9 +333,12 @@ export default function ProductForm() {
 
       <button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition"
+        disabled={submitting}
+        className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition ${
+          submitting ? "opacity-50 cursor-not-allowed" : ""
+        }`}
       >
-        Add Product
+        {submitting ? "Submitting..." : "Add Product"}
       </button>
     </form>
   );

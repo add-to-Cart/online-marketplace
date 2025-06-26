@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "@/services/firebase";
 import { useUser } from "@/contexts/UserContext";
 import { Link } from "react-router-dom";
@@ -34,6 +41,21 @@ export default function ProductList() {
     fetchProducts();
   }, [user]);
 
+  const handleDelete = async (productId) => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+    if (!confirm) return;
+
+    try {
+      await deleteDoc(doc(db, "products", productId));
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      alert("✅ Product deleted from Firestore.");
+    } catch (err) {
+      alert("❌ Failed to delete product.", err);
+    }
+  };
+
   if (loading) {
     return <div className="text-gray-600 p-4">Loading products...</div>;
   }
@@ -43,7 +65,7 @@ export default function ProductList() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <h2 className="text-xl font-semibold text-gray-800">
           Your Product Listings
@@ -58,7 +80,7 @@ export default function ProductList() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
         {products.map((product) => (
           <div
             key={product.id}
@@ -110,7 +132,7 @@ export default function ProductList() {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
               <Link
                 to={`/seller/products/edit/${product.id}`}
                 className="px-3 py-1 text-sm text-blue-600 hover:underline"
@@ -118,7 +140,7 @@ export default function ProductList() {
                 Edit
               </Link>
               <button
-                onClick={() => alert("Delete logic goes here")}
+                onClick={() => handleDelete(product.id)}
                 className="px-3 py-1 text-sm text-red-600 hover:underline"
               >
                 Delete

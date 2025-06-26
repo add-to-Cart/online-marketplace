@@ -27,7 +27,11 @@ export const uploadAvatar = async (file) => {
   return await uploadToCloudinary(file, UPLOAD_PRESET_AVATAR);
 };
 
-export const uploadProductImage = async (file) => {
+export const uploadProductImage = async (file, options = {}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append;
+
   return await uploadToCloudinary(file, UPLOAD_PRESET_PRODUCT);
 };
 
