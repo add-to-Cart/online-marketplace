@@ -13,19 +13,19 @@ export const getRecommendedProducts = async (currentProduct, limit = 6) => {
     }));
 
     const recommended = allProducts
-      .filter((item) => item.id !== currentProduct.id)
+      .filter(
+        (item) => item.id !== currentProduct.id && item.isAvailable !== false
+      )
       .map((item) => {
         let score = 0;
+
+        if (item.category === currentProduct.category) score += 3;
 
         if (Array.isArray(item.tags) && Array.isArray(currentProduct.tags)) {
           const commonTags = item.tags.filter((tag) =>
             currentProduct.tags.includes(tag)
           );
           score += commonTags.length;
-        }
-
-        if (item.category === currentProduct.category) {
-          score += 2;
         }
 
         if (
@@ -38,9 +38,7 @@ export const getRecommendedProducts = async (currentProduct, limit = 6) => {
           score += commonStyles.length;
         }
 
-        if (item.vehicleType === currentProduct.vehicleType) {
-          score += 1;
-        }
+        if (item.vehicleType === currentProduct.vehicleType) score += 1;
 
         if (typeof item.viewCount === "number") {
           score += Math.min(Math.floor(item.viewCount / 10), 3);
@@ -54,7 +52,6 @@ export const getRecommendedProducts = async (currentProduct, limit = 6) => {
 
     return recommended;
   } catch (error) {
-    alert("Error getting recommendations:", error);
     return [];
   }
 };

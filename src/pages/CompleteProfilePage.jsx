@@ -96,18 +96,17 @@ export default function CompleteProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-900 text-white px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md space-y-6 bg-stone-800 p-6 rounded-xl shadow"
-      >
-        <h1 className="text-xl font-bold text-center">Complete Your Profile</h1>
-        <p className="text-sm text-gray-300 text-center">
-          Please choose a unique username to continue.
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
+        <h1 className="text-xl font-semibold text-center text-gray-800">
+          Complete Your Profile
+        </h1>
+        <p className="text-xs text-gray-500 text-center">
+          Choose a unique username to continue.
         </p>
 
         <div className="space-y-2">
-          <label htmlFor="username" className="block text-sm font-medium">
+          <label htmlFor="username" className="block text-xs text-gray-700">
             Username
           </label>
           <div className="flex gap-2">
@@ -119,30 +118,34 @@ export default function CompleteProfilePage() {
                 setUsername(e.target.value.toLowerCase());
                 setAvailable(null);
               }}
-              className="flex-1 px-3 py-2 rounded-md text-black"
+              className="flex-1 p-2 border border-gray-300 text-sm focus:outline-none focus:border-blue-500"
               required
             />
             <button
               type="button"
               onClick={checkAvailability}
-              className="px-3 py-2 bg-blue-600 rounded-md text-white text-sm hover:bg-blue-700"
+              className="px-3 text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400"
               disabled={checking || !username.trim()}
             >
               {checking ? "Checking..." : "Check"}
             </button>
           </div>
           {available === true && (
-            <p className="text-green-400 text-sm">✅ Username is available!</p>
+            <p className="text-green-600 text-xs">Username is available</p>
           )}
           {available === false && (
-            <p className="text-red-400 text-sm">❌ Username is taken.</p>
+            <p className="text-red-600 text-xs">Username is taken</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={!available || submitting}
-          className="w-full py-2 bg-green-600 rounded-md text-white font-medium hover:bg-green-700 disabled:opacity-50"
+          className={`w-full py-2 text-sm text-white font-medium ${
+            submitting
+              ? "bg-green-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
           {submitting ? "Saving..." : "Finish"}
         </button>

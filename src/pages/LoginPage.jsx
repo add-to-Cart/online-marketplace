@@ -147,25 +147,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <ToastContainer
         position="top-center"
         autoClose={3000}
         toastClassName={() =>
-          "text-sm p-1 px-2 rounded bg-white text-gray-700 shadow"
+          "text-sm p-1 px-2 bg-white text-gray-700 border border-gray-200"
         }
         bodyClassName="text-xs"
       />
-      <div className="p-8 rounded-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-          Welcome Back
+      <div className="w-full max-w-sm">
+        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">
+          Sign in to your account
         </h2>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-3">
           <input
             type="text"
             placeholder="Email or Username"
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-2 border rounded border-gray-300 text-sm focus:outline-none focus:border-blue-500"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
@@ -173,23 +173,24 @@ export default function LoginPage() {
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-2 border rounded border-gray-300 text-sm focus:outline-none focus:border-blue-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center space-x-2">
+          <div className="flex items-center justify-between text-xs text-gray-600">
+            <label className="flex items-center space-x-1">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
+                className="accent-blue-500"
               />
               <span>Remember me</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-blue-500 hover:underline"
+              className="text-blue-600 hover:underline"
             >
               Forgot password?
             </Link>
@@ -197,34 +198,32 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 rounded-lg font-semibold transition ${
+            className={`w-full rounded py-2 text-sm font-medium ${
               loading
-                ? "bg-blue-400 cursor-not-allowed text-white"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+                ? "bg-blue-300 text-white cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <div className="my-4 text-center text-sm text-gray-500">OR</div>
+        <div className="my-4 text-center text-xs text-gray-500">OR</div>
 
         <button
           onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg hover:bg-gray-100 transition"
+          className="w-full rounded flex items-center justify-center border border-gray-300 text-sm py-2 hover:bg-gray-50"
           disabled={loading}
         >
-          <FcGoogle className="mr-2 text-xl" />
+          <FcGoogle className="mr-2 text-lg" />
           Continue with Google
         </button>
 
-        <div className="mt-6 text-sm text-center text-gray-600 space-y-1">
-          <p>
-            Don’t have an account?{" "}
-            <Link to="/signup" className="text-blue-500 hover:underline">
-              Register now
-            </Link>
-          </p>
+        <div className="mt-4 text-xs text-center text-gray-600">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-blue-600 hover:underline">
+            Register now
+          </Link>
         </div>
       </div>
     </div>

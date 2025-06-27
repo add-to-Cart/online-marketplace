@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer, act } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { registerWithEmail, signInWithGoogle } from "@/services";
 import { isUsernameAvailable, validateUsername } from "@/helpers";
 import { FcGoogle } from "react-icons/fc";
@@ -58,8 +58,7 @@ export default function SignupPage() {
         const available = await isUsernameAvailable(trimmed);
         dispatch({ type: "SET_USERNAME_AVAILABLE", payload: available });
       } catch (error) {
-        dispatch({ type: "SET_USERNAME_AVAILABLE", payload: available });
-        alert(error.message);
+        dispatch({ type: "SET_USERNAME_AVAILABLE", payload: false });
       } finally {
         dispatch({ type: "SET_CHECKING_USERNAME", payload: false });
       }
@@ -79,8 +78,8 @@ export default function SignupPage() {
       return;
     }
 
-    if (usernameAvailable === false || usernameAvailable === null) {
-      alert("Username is taken or invalid. Please choose another.");
+    if (!usernameAvailable) {
+      alert("Username is not available. Please choose another.");
       return;
     }
 
@@ -93,18 +92,18 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-          Create Your Account
+    <div className="min-h-screen flex items-center justify-center px-4 bg-white">
+      <div className="w-full max-w-md">
+        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">
+          Create Account
         </h2>
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-3">
           <div>
             <input
               type="text"
               placeholder="Username"
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
               value={username}
               onChange={(e) =>
                 dispatch({ type: "SET_USERNAME", payload: e.target.value })
@@ -112,20 +111,17 @@ export default function SignupPage() {
               required
             />
             {username && (
-              <p className="text-sm mt-1">
+              <p className="text-xs mt-1">
                 {usernameError ? (
-                  // Show whatever error message validateUsername returns
                   <span className="text-red-600">{usernameError}</span>
                 ) : checkingUsername ? (
                   <span className="text-gray-500">
                     Checking availability...
                   </span>
                 ) : usernameAvailable ? (
-                  <span className="text-green-600">
-                    Username is available ✅
-                  </span>
+                  <span className="text-green-600">Available</span>
                 ) : (
-                  <span className="text-red-600">Username is taken ❌</span>
+                  <span className="text-red-600">Taken</span>
                 )}
               </p>
             )}
@@ -134,45 +130,49 @@ export default function SignupPage() {
           <input
             type="email"
             placeholder="Email"
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            className={`w-full py-2 rounded font-medium text-sm ${
+              checkingUsername || usernameAvailable === false || usernameError
+                ? "bg-blue-300 text-white cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
             disabled={
-              checkingUsername ||
-              usernameAvailable === false ||
-              usernameError !== null
+              checkingUsername || usernameAvailable === false || usernameError
             }
           >
             Sign Up
           </button>
         </form>
 
-        <div className="my-4 text-center text-sm text-gray-500">OR</div>
+        <div className="my-4 text-center text-xs text-gray-500">OR</div>
 
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center border border-gray-300 py-3 rounded-lg hover:bg-gray-100 transition"
+          className="w-full flex items-center justify-center border border-gray-300 py-2 rounded hover:bg-gray-50 transition text-sm"
         >
-          <FcGoogle className="mr-2 text-xl" />
+          <FcGoogle className="mr-2 text-lg" />
           Continue with Google
         </button>
 
-        <div className="mt-6 text-sm text-center text-gray-600">
+        <div className="mt-4 text-center text-xs text-gray-600">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Log in
           </Link>
         </div>

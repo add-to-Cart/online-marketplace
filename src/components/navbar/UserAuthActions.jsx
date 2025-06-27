@@ -3,55 +3,38 @@ import { Link } from "react-router-dom";
 export default function UserAuthActions({ user, logout }) {
   if (!user) {
     return (
-      <>
-        <Link
-          to="/login"
-          className="text-xs font-medium text-gray-50 hover:text-gray-400"
-        >
+      <div className="flex items-center gap-2">
+        <Link to="/login" className="text-sm hover:text-indigo-400">
           Sign in
         </Link>
-        <span aria-hidden="true" className="h-6 w-px bg-gray-200" />
-        <Link
-          to="/signup"
-          className="text-xs font-medium text-gray-50 hover:text-gray-400"
-        >
-          Create account
+        <span className="text-gray-400">|</span>
+        <Link to="/signup" className="text-sm hover:text-indigo-400">
+          Sign up
         </Link>
-      </>
+      </div>
     );
   }
-
-  if (!user.emailVerified) {
-    return (
-      <span className="text-xs text-yellow-400">Please verify your email</span>
-    );
-  }
-
-  if (!user.username) {
-    return (
-      <span className="text-xs text-yellow-400">Complete your profile</span>
-    );
-  }
-
   return (
-    <>
+    <div className="flex items-center gap-2">
       <Link
         to="/profile"
-        className="flex items-center space-x-2 text-xs font-medium text-gray-50 hover:text-red-500"
+        className="flex items-center space-x-2 hover:text-indigo-400"
       >
         <img
-          src={user.avatarUrl || "defaultAvatar"}
-          alt="avatar"
-          className="w-6 h-6 rounded-full object-cover border"
+          src={user.avatarUrl || "/default-avatar.svg"}
+          alt="Profile"
+          className={`w-7 h-7 rounded-full object-cover border border-gray-300 ${
+            user.avatarUrl ? "" : "p-1"
+          }`}
         />
-        <span>{user.username || "Anonymous"}</span>
+        <span className="text-sm">{user.username || "User"}</span>
       </Link>
       <button
         onClick={logout}
-        className="text-xs font-medium text-gray-50 hover:text-red-500 hover:cursor-pointer"
+        className="text-sm text-gray-200 hover:text-red-400"
       >
         Logout
       </button>
-    </>
+    </div>
   );
 }

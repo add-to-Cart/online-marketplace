@@ -1,106 +1,108 @@
+// src/components/Navbar.jsx
+
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bars3Icon,
   ShoppingBagIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import { useNavigate, Link } from "react-router-dom";
 import UserAuthActions from "./UserAuthActions";
-import MobileMenu from "./MobileMenu";
-import DesktopNav from "./DesktopNav";
 import navigation from "@/data/navigationData";
 import { useUser } from "@/contexts/UserContext";
+import { useCart } from "@/contexts/CartContext";
 import { auth } from "@/services/firebase";
 import { signOut } from "firebase/auth";
+import MobileMenu from "./MobileMenu";
 
 export default function Navbar() {
-  const { user, loading } = useUser();
-  const [open, setOpen] = useState(false);
+  const { cartItems } = useCart();
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const { user } = useUser();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
-  const [banner, setBanner] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate("/login");
-    } catch (_) {}
+  const logout = async () => {
+    await signOut(auth);
+    navigate("/login");
   };
 
   return (
-    <header className="bg-stone-900 text-white text-sm shadow-md">
-      {banner && (
-        <p className="bg-purple-800 h-8 flex items-center justify-center px-4 font-medium">
-          Holiday Sale!
-        </p>
-      )}
+    <>
+      <header className="bg-black text-white border-b border-neutral-800">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/logo.png" alt="Logo" className="h-16 w-auto" />
+          </Link>
 
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-end h-10">
-          <button
-            onClick={() => setOpen(true)}
-            className="lg:hidden p-2 text-gray-400 hover:text-gray-300"
-            aria-label="Open menu"
-          >
-            <Bars3Icon className="h-5 w-5" />
-          </button>
-          {!loading && (
-            <div className="hidden lg:flex items-center gap-x-4">
-              <UserAuthActions user={user} logout={handleLogout} />
+          <nav className="hidden lg:flex items-center space-x-6 text-sm">
+            {navigation.pages.map((page) => (
+              <Link
+                key={page.name}
+                to={page.href}
+                className="hover:text-blue-400 transition"
+              >
+                {page.name}
+              </Link>
+            ))}
+
+            <div className="relative group">
+              <button className="hover:text-blue-400 transition">
+                Categories
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-neutral-900 border border-neutral-700 rounded shadow-sm opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50">
+                {navigation.categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/category/${cat.id}`}
+                    className="block px-4 py-2 text-sm text-white hover:bg-neutral-800"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
             </div>
-          )}
-        </div>
+          </nav>
 
-        <div className="flex items-center justify-between py-2 gap-2 flex-wrap">
-          <Link to="/" className="flex-shrink-0">
-            <img
-              src="logo.png"
-              alt="CarCycleTech"
-              className="h-16 w-auto object-contain"
-            />
-          </Link>
+          <div className="flex items-center space-x-4">
+            <div className="hidden lg:block">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="text-sm px-3 py-1.5 border border-neutral-700 rounded bg-neutral-900 text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
 
-          <div className="hidden lg:block relative flex-grow max-w-xl mx-4">
-            <MagnifyingGlassIcon
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-50"
-              aria-hidden="true"
-            />
-            <input
-              type="text"
-              placeholder="Search parts..."
-              className="w-full pl-9 pr-3 py-1.5 border border-gray-600 rounded-md bg-stone-800 text-gray-100 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-            />
+            <Link to="/cart" className="relative">
+              <ShoppingBagIcon className="h-6 w-6 text-white hover:text-blue-400" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-medium w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            <div className="hidden lg:flex items-center">
+              <UserAuthActions user={user} logout={logout} />
+            </div>
+
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-2"
+            >
+              <Bars3Icon className="h-6 w-6 text-white" />
+            </button>
           </div>
-
-          <Link to="/cart" className="p-2 text-gray-50 hover:text-gray-400">
-            <ShoppingBagIcon className="h-5 w-5" />
-            <span className="sr-only">Cart</span>
-          </Link>
         </div>
-
-        <div className="hidden lg:flex justify-center py-2">
-          <DesktopNav navigation={navigation} />
-        </div>
-
-        <div className="lg:hidden relative mt-2 mb-2">
-          <MagnifyingGlassIcon
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-            aria-hidden="true"
-          />
-          <input
-            type="text"
-            placeholder="Search parts..."
-            className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-      </nav>
+      </header>
 
       <MobileMenu
-        open={open}
-        setOpen={setOpen}
+        open={mobileOpen}
+        setOpen={setMobileOpen}
         navigation={navigation}
         user={user}
-        logout={handleLogout}
+        logout={logout}
       />
-    </header>
+    </>
   );
 }
