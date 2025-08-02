@@ -25,12 +25,14 @@ import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import OrderSuccessPage from "@/pages/OrderSuccessPage";
 import AllProductsPage from "@/features/marketplace/pages/AllProductsPage";
+import TestFeaturePage from "@/features/marketplace/recommendations/tests/Test";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path="/" element={<AllProductsPage />} />
+        <Route path="/" element={<TrendingPage />} />
+        <Route path="/all-products" element={<AllProductsPage />} />
         <Route path="/trending" element={<TrendingPage />} />
         <Route path="/deals" element={<DealsPage />} />
         <Route path="/brands" element={<BrandsPage />} />
@@ -59,6 +61,7 @@ export default function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/restricted" element={<RestrictedSellerPage />} />
+      <Route path="/test" element={<TestFeaturePage />} />
     </Routes>
   );
 }

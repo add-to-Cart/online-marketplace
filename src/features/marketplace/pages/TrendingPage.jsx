@@ -1,35 +1,23 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/services/firebase";
+import getRankedData from "../recommendations/scoring";
 import ProductCard from "@/features/marketplace/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
 
 export default function TrendingPage() {
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const fetchTrendingProducts = async () => {
+    const snapshot = await getDocs(collection(db, "products"));
+    const productsList = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setTrendingProducts(getRankedData(productsList));
+    setLoading(false);
+  };
   useEffect(() => {
-    const fetchTrendingProducts = async () => {
-      try {
-        const q = query(
-          collection(db, "products"),
-          orderBy("soldCount", "desc"),
-          orderBy("viewCount", "desc"),
-          limit(20)
-        );
-        const snapshot = await getDocs(q);
-        const products = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setTrendingProducts(products);
-      } catch (error) {
-        alert("Error fetching trending products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTrendingProducts();
   }, []);
 

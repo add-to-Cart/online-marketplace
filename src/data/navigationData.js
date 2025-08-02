@@ -11,8 +11,8 @@ const navigation = {
     { id: "accessories", name: "Accessories", href: "/category/accessories" },
   ],
   pages: [
-    { name: "Market", href: "/" },
     { name: "Trending", href: "/trending" },
+    { name: "All Products", href: "/all-products" },
     { name: "Deals", href: "/deals" },
     { name: "Brands", href: "/brands" },
   ],
