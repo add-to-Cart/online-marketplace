@@ -1,3 +1,3 @@
 export default function BrandsPage() {
-  return <h1>Brands</h1>;
+  return <h1>Brand Page</h1>;
 }
